@@ -1,0 +1,2480 @@
+---
+title: "SQL Studies"
+subtitle: "Notas, exemplos e exercícios"
+author: "Alisson Dopona"
+format:
+  html:
+    toc: true
+    toc-depth: 5
+    code-fold: false
+    theme: cosme
+---
+
+## Revisão Modelagem Relacionals
+
+Na modelagem relacional, alguns conceitos mudam:
+
+- Linha -\> Tupla
+
+- Coluna -\> Atributo
+
+- Tabela -\> Relação
+
+- Dados que especifica o tipo de valores em um atributo -\> Domínio
+
+As relações podem possuir diferentes chaves. As mais comuns são:
+
+- Chave primária: Identifica unicamente cada tupla e é identificada pelo sublinhado;
+
+- Chave estrangeira: Após definir a Relação, identificamos a chave estrangeira:
+
+``` sql
+<nome_da_coluna> referencia <nome_da_tabela>
+```
+
+Por exemplo:
+
+Empregado( <u>Matrícula</u> , Nome, Endereço, Função, Salário, Dep)
+
+``` sql
+<Dep> referencia <Departamento>
+```
+
+Departamento(<u>CodDepart</u>, Nome Endereço)
+
+Neste caso, o atributo Dep na relação Empregado é uma chave estrangeira da relação Departamento. E como podemos ver, ela sempre irá se referenciar a chave primária da outra relação.
+
+#### Restrições
+
+Busca assegurar a restrições dos dados. Temos cinco restrições:
+
+1.  Chave: Deve ser um valor único; (é uma definição de Modelo Relacional)
+2.  Entidade: Chave primária não pode ser nulo;
+3.  Vazio: Define se a coluna tem ou não que ser preenchida (vazia);
+4.  Domínio: Deve obdecer as definições estabelecidas;
+5.  Referencial: É a restrição que define que os valores da chave estrangeira deve aparecer na chave primária. É a restrição mais importante.
+
+#### Operações
+
+- Recuperação: consulta dados
+
+- Atualização: muda os estados das relações
+
+<u>Atualização</u>:
+
+- Inserir
+
+- Excluir
+
+- Alterar
+
+> As operações não devem violar as restrições de integridade.
+
+<u>Inserir</u>:
+
+``` sql
+inserir <valor1, valor2, valorn> em R
+```
+
+Se acontecer alguma violação de integridade, o Modelo Relacional prevê duas opções:
+
+- Opção Padrão: Rejeitar a inserção, uma vez que viola a restrição que mantém a integridade dos dados;
+
+- Opção alternativa: Corrigir o motivo da rejeição
+
+<u>Excluir</u>:
+
+Especificamos uma condição sobre os atributos que, partindo da condição definida, irá selecionar as tuplas que serão excluídas:
+
+``` sql
+Exluir tupla em R com atributo1 = valor1 e atributo2 = valo2
+```
+
+Se houver violação de integridade, há duas opções:
+
+- Restrict: rejeitar a exclusão;
+
+- Cascade: tentar propagar a exclusão, excluíndo tuplas que a referenciam;
+
+> O Cascade é perigoso, uma vez que pode ser propagado alterações (exclusão) até que as restrições não sejam mais violadas, excluíndo atributos que deveriam ser mantidos.
+
+- Set null/default: modificam os valores de atributo que referenciam a causa da violação;
+
+  > Por exemplo, se tentar apagar um funcionário que possui dependente, podemos "setar" um valor de funcionários na relação Dependentes só para permitir a operação.
+
+- Pode também haver uma combinação das 3. Porém, o mais adequado é o Restrict.
+
+<u>Alterar</u>:
+
+Usado para alterar valores em uma tupla que já existe, segundo uma condição que queremos:
+
+``` sql
+Alterar atributo_alvo da tupla em R com atributo_cond = valor_cond para valor_alvo
+```
+
+Se formos mexer em um atributo que não faz parte de chave primária ou chave estrangeira, possivelmente não terá problemas.
+
+Em caso de violação de restrição, recai sobre os casos do Inserir ou Excluir, precisando fazer o tratamento da alteração.
+
+## Conceitos iniciais de SQL
+
+SQL vem de *Structured Query Language* e é a linguagem padrão em Sistemas Gerenciadores de Banco de Dados (SGBDs) devido a sua simplicidade e facilidade de uso.
+
+É uma linguagem declarativa, ou seja, indica <u>o que</u> consultar, e não como.
+
+Para trabalhar nos diferentes SGBDs, cada um possui pacotes adicionais ao núcleo da Linguagem SQL. Ela por si só possui tem uma definição de como foi desenvolvida, mas os SGBDs podem ir acrescentando algumas operações.
+
+Com o SQL, conseguimos definir a estrutura dos dados, realizar consultas, realizar atualizações e controle de acesso ao BD, tudo isso através das sublinguagens que o SQL nos fornece:
+
+- DDL
+
+- DML
+
+- DQL
+
+- VDL
+
+- DCL
+
+Além disso, é possível incluir SQL em código de programação genérica, e por isso, é amplamente utilizado.
+
+A primeira sublinguagem é a DDL
+
+#### DDL: Data Definition Language
+
+Ela tem como objetivo a criação, alteração e remoção de objetos do BD (esquemas, tabelas e atributos). Exemplo:
+
+``` sql
+CREATE TABLE EMPREGADOS(
+    NOME VARCHAR(100) NOT NULL,
+    CPF VARCHAR(11) PRIMARY KEY,
+    DATANASC DATE,
+    ENDERECO VARCHAR(30),
+    SEXO CHAR,
+    SALARIO DECIMAL(12,2),
+    SUPERCPF VARCHAR(11) REFERENCES EMPREGADO(CPF),
+    DNO INT NOT NULL REFERENCES DEPARTAMENTO(DNUM)
+);
+```
+
+Para alterar, utilizamos o comando `ALTER TABLE`:
+
+``` sql
+ALTER TABLE EMPREGADOS RENAME TO EMPREGADO;
+ALTER TABLE EMPREGADO ADD COLUMN FUNCAO TYPE VARCHAR(50);
+ALTER TABLE EMPREGADO DROP COLUMN SALARIO;
+ALTER TABLE EMPREGADO ALTER COLUMN ENDERECO TYPE VARCHAR(50);
+```
+
+Para remoção de uma tabela, usamos o `DROP TABLE`:
+
+``` sql
+DROP TABLE EMPREGADO
+```
+
+Ou seja, para mexer na estrutura dos meus dados, precisamos do DDL.
+
+#### DML: Data Manipulation Language
+
+É utilizada para <u>manipular</u> os dados. Ou seja, inserir, remover ou alterar linhas de uma tabela. Para isso, usamos comandos como:
+
+``` sql
+INSERT
+DELETE
+UPDATE
+```
+
+#### DQL: Data Query Language
+
+Basicamente reune os comandos para seleção de dados, ou seja, comandos de consulta no Banco de Dados. O mais comum é:
+
+``` sql
+SELECT FROM
+```
+
+Alguns livros jutam o DML com o DQL.
+
+#### VDL: View Data Language
+
+Em que possui comandos para visões, ou seja, um retrato restrito de uma tabela com seus dados. É usado para um relatório, ou quando não queremos exibir muitas informações.
+
+``` sql
+CREATE VIEW EMP_FINANCEIRO AS
+SELECT * FROM EMPREGADO
+WHERE DNOM = 1
+```
+
+\*1 é o ID do Financeiro
+
+#### DCL: Data Control Language
+
+São os comandos de acesso aos dados a través do BD. Os SGBDs possuem usuários que terão permissão de acesso, e essas permissões podem mudar conforme o usuário.
+
+Com essa linguagem, podemos permitir que usários façam determinadas ações sobre determinadas tabelas, ou podemos liberar todo o BD. Podemos, por exemplo, impedir que determinado usuário não faça exclusão ou inserção registros, mas só consultar, a sublinguagem DCL pode ser usada para conceder ou remover privilégios sobre ações nas tabelas.
+
+``` sql
+GRANT INSERT ON EMPREGADOS TO BRUNO;
+GRANT ALL PRIVILEGES
+                ON DEPARTAMENTO TO POSTGRES;
+REVOKE DELETE ON EMPREGADO FROM BRUNO;
+REVOKE ALL PRIVILEGES ON DEPARTAMENTO FROM
+  POSTGRES;
+```
+
+## Instalando o PostgreSQL
+
+Para instalar o postgresql no Ubuntu, o primeiro passo é rodar o seguinte comando:
+
+``` bash
+sudo apt install postgresql postgresql-contrib
+```
+
+Em seguida, iniciamos o banco de dados:
+
+``` bash
+sudo systemctl start postgresql
+```
+
+E habilitamos com:
+
+``` bash
+sudo systemctl enable postgresql
+```
+
+E certificamos o status com:
+
+``` bash
+sudo systemctl status postgresql
+```
+
+Esperamos que apareça em `Active`: `active (exited)`.
+
+Agora, temos que instalar o PgAdmin.
+
+Para isso, vamos ao [site](https://www.pgadmin.org/download/pgadmin-4-apt/) e iniciamos instalando a chave pública:
+
+``` bash
+curl -fsS https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /etc/apt/keyrings/packages-pgadmin-org.gpg
+```
+
+Em seguida criamos o repositório:
+
+``` bash
+sudo sh -c 'echo "deb [signed-by=/etc/apt/keyrings/packages-pgadmin-org.gpg] https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list && apt update'
+```
+
+E então instalamos o PgAdmin:
+
+``` bash
+sudo apt install pgadmin4-desktop
+```
+
+> Há uma versão web. Se queremos ambas as versões: web e desktop, podemos apenas digitar: `sudo apt install pgadmin4`
+
+#### Configurar o PostgreAdmin
+
+Precisamos configurar o PostgreAdmin para se conectar com o Banco de Dados. Para isso, vamos ao terminal para configurar um usuário.
+
+No terminal, digitamos:
+
+``` bash
+sudo -u postgres psql
+```
+
+Dessa forma, acessamos o banco de dados. Nele, vamos adicionar o comando:
+
+``` bash
+ALTER USER postgres WITH PASSWORD 'senha do postgres';
+```
+
+Esse comando diz que desejamos alterar a senha do usuário postgres, que é o usuário *default* do Banco de Dados. Para isso, precisamos substituir o 'senha do postgres' pela senha que desejamos.
+
+Assim, nós configuramos o usuário postgres, e então, vamos fazer com que o PostgresAdmin se conect com o banco de dados. Para isso, vamos no PostgresAdmin.
+
+Na página inicial aparece: `Add new Server`. Clicamos nele. Irá abrir uma janela em que, na aba `General`, iremos fazer a nomeação da conexão com qualquer nome. Na aba `Connection` colocamos como Host name/adress: localhost. Mantemos o nome do banco de dados e do usuário (geralmente ambos como `postgres`. A senha é a que acabamos de configurar. Clicamos em save e pronto, está configurado.
+
+## Rodando o PostgreSQL no R
+
+Para rodar o PostgreSQL no R, precisamos instalar os pacotes `RPostgre` e `DBI`. Como já tenho, precisamos apenas carregar. O pacote DBI precisa ser carregado primeiro.
+
+``` r
+library(DBI)
+library(RPostgres)
+library(usethis)
+```
+
+Em seguida, precisamos carregar as variáveis manualmente:
+
+``` r
+readRenviron("~/.Renviron")
+```
+
+Em seguida, precisamos fazer a conexão com o R. A senha precisa estar no `Renviron` para então adicionarmos aqui.
+
+``` r
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname = "nome_bd",
+  host = localhost,
+  port = 5432,
+  user = postgres,
+  password = minhasenha
+)
+```
+
+Verificar se a conexão funcionou:
+
+``` r
+DBI::dbIsValid(con)
+```
+
+Para cancelar a conexção é só rodar:
+
+``` r
+DBI::dbDisconnect(con)
+```
+
+## DDL Create
+
+Principais comandos da Data Defination Language (DDL).
+
+O principal é o CREATE, que faz a criação das tabelas, esquemas, domínios e até das visões.
+
+A ideia de esquema é ser algo como uma coleções de Tabelas, ou seja, diversas tabelas que se relacionam entre si em uma determinada lógica de opeção em um banco de dados. Dessa forma, Um Bancod de Dados pode ser composto por vários Esquemas, e um Esquema pode ser compsoto por várias Tabelas.
+
+No curso trabalhamos com BD mais enchutos, ou seja, um Banco de Dados é um Esquema, que é um grupo de tabelas.
+
+O Comando `CREATE TABLE` vai criar tabela com atributos (colunas) e restrições iniciais de um modelo relacional. Elas podem ser feitas de três formas:
+
+1.  Dentro do comando, após a declaração de cada atributo;
+    1.  Dentro do comando, depois que o atributo foi declarado;Com o comando `ALTER TABLE`.
+
+##### Tipos de dados de atributos
+
+<u>Numéricos</u>
+
+- Inteiros de vários tamanhos
+
+- Pontos flutuantes de várias precisões:
+
+  ::: {}
+  - Decimal (i,j) ou Numérico (i,j)
+
+    - i - precisão: número de dígitos total
+
+    - j - escala: número de dígitos depois da casa decimal
+  :::
+
+Por exemplo, um número como 1345,67 é algo como (6,2).
+
+<u>Cadeias de Caracteres</u>
+
+- 
+
+- Tamanho variável: `VARCHAR(n)`, `CHAR VARYING(n)`, `CHARACTER VARYING(n)`, dessa forma, o n entre parêntese estabelece o número máximo de caracteres dentro do atributo.
+
+- Valores dos atributos de caracteres precisam ser identificado com aspas simples ''.
+
+- Operação de concatenação: \|\|
+
+  - 'ABC' \|\| 'xyz' = ABCxyz
+
+<u>Booleano</u>
+
+- Apenas `TRUE` e `FALSE`
+
+<u>Data</u>
+
+- DATE
+
+  - Data
+
+  - YYYY-MM-DD
+
+- TIME
+
+  - Tempo
+
+  - HH:MM:SS
+
+- TIMESTAMP
+
+  - Data e tempo
+
+  - YYYY-MM-DD HH-MM-SS
+
+- INTERVAL
+
+  - 2 dias, 3 meses...
+
+  - Operadores \<\> são permitidos.
+
+Então podemos começar a pensar em criar uma tabela. As informações nescessárias podem ser obtidas a partir do Modelo Relacional. As restrições ficam após a declaração de cada atributo.
+
+``` sql
+CREATE TABLE EMPREGADOS(
+      NOME VARCHAR(100) NOT NULL,
+      CPF VARCHAR(11) PRIMARY KEY,
+      DATANASC DATE,
+      ENDERECO VARCHAR(30),
+      SEXO CHAR,
+      SALARIO DECIMAL(12,2),
+      SUPERCPF VARCHAR(11) REFERENCES EMPREGADO(CPF),
+      DNO INT NOT NULL REFERENCES DEPARTAMENTO(DNUM)
+);
+```
+
+Neste caso, falamos que Nome não pode estar vazio. No SQL usamos `NOT NULL` para identificar um atributo com essa restrição.
+
+O CPF é a chave primária, e é declarado como `PRIMARY KEY` após identificar o atributo.
+
+Porém, podemos fazer as declarações de restrição, depois de declarar o atributo:
+
+``` sql
+CREATE TABLE EMPREGADOS(
+      NOME VARCHAR(100) NOT NULL,
+      CPF VARCHAR(11) NOT NULL,
+      DATANASC DATE,
+      ENDERECO VARCHAR(30),
+      SEXO CHAR,
+      SALARIO DECIMAL(12,2),
+      SUPERCPF VARCHAR(11),
+      DNO INT NOT NULL,
+PRIMARY KEY(CPF),
+FOREING KEY(SUPERCPF) REFERENCES EMPREGADO(CPF),
+FOREING KEY(DNO) REFERENCES DEPARTAMENTO()
+);
+```
+
+Ou seja, primeiro declaramos os atributos, e depois declaramos as restrições.
+
+## Restrições Básicas em SQL
+
+#### Restrição de Atributo
+
+Se não for permitido algum atributo ficar como `NULL`, usamos:
+
+- `NOT NULL`
+
+- É uma restrição implícita para a chave primária.
+
+Podemos também declarar um padrão *default*, ou seja, se ao inserir uma tupla, não declarar valor para um determinado atributo, irá entrar o valor *default*. Porém, se não for definido um valor *default* então será `NULL`.
+
+Podemos também colocar limite em um valor de domínio. Por exemplo:
+
+``` sql
+CREATE TABLE DEPARTAMANTO(
+      NOME VARCHAR(50),
+      DNUMERO INT NOT NULL,
+            CHECK (DNUMERO >0 AND DNUMERO <= 20),
+      PRIMARY KEY(DNUMERO)
+)
+```
+
+Neste caso, embora declaramos `DNUMERO`, podemos colocar a cláusula `CHECK`, para verificar se o valor atende as restrições indicadas dentro do parâmetros, no caso, o número de departamentos necessáriamente precisa estar entre 1 e 20.
+
+Podemos utilizar essa cláusula (`CHECK`) para verificar a Restrição de Domínio:
+
+``` sql
+CREATE DOMAIN D_NUM AS INTEGER(
+      CHECK (DNUMERO >0 AND DNUMERO <=20)
+);
+
+CREATE TABLE DEPARTAMENTO(
+NOME VARCHAR(50),
+DNUMERO D_NUM NOT NULL,
+PRIMARY KEY(DNUMERO)
+);
+```
+
+Aqui, a cláusula `CHECK` foi utilizada para criar um domínio, ou seja, que tipo de valor esse atributo vai aceitar. E assim, usamos o D_NUM para armazenar a especificação de domínio.
+
+Restrições de Chave
+
+Especifica se um ou mais atributos serão definidos como Chave Primária da Relação.
+
+Usar o `PRIMARY KEY` dessa forma é permitido apenas quando temos um atributo como chave primária:
+
+``` sql
+CREATE TABLE DEPARTAMENTO(
+      NOME VARCHAR(50),
+      DNUMERO PRIMARY KEY
+);
+```
+
+Se for composto, devemos definir abaixo ou então usando `ALTER TABLE:`
+
+``` sql
+CREATE TABLE DEPARTAMENTO(
+          NOME VARCHAR(50),
+          CPF NOT NULL
+          DNUMERO NOT NULL,
+      PRIMARY KEY(DNUMERO),
+      PRIMARY KEY(CPF)
+);
+```
+
+Podemos também declarar as Chaves Alternativas, ou seja, aqueles atributos que também não se repetem, mas não utilizados como Chaves Primarias:
+
+``` sql
+CREATE TABLE ALUNO(
+    NOME VARCHAR(50),
+    MATRICULA VARCHAR(8) PRIMARY KEY,
+    CPF VARCHAR(11) UNIQUE NOT NULL
+);
+```
+
+Dessa forma usamos a restrição `UNIQUE` para caracterizar uma atributo como um atributo que não se repete, que é único.
+
+Restrição de Integridade Referencial
+
+As Restrições de Integridade Referencial podem ser quebradas quando valores da Chave Estrangeira ou Chave Primária forem modificados.
+
+O SGBD tem como padrão rejeitar (`RESTRICT`)
+
+> Por isso, sempre ficar atento pois as rejeições de inserção/modificação podem significar que estamos tentando alterar a CP ou CE.
+
+As Restrições Referencial são a alma dos Modelo Relacional.
+
+Dessa forma:
+
+- `SET NULL ON DELETE`
+
+  - Na exclusão, marca nulo
+
+- `SET DEFAULT ON DELETE`
+
+  - Na exclusão, define valor padrão
+
+- `CASCADE ON DELETE`
+
+  - Na exclusão, propagar
+
+- `SET NULL ON UPDATE`
+
+  - Na atualização, marcar nulo
+
+- `SET DEFAULT ON UPDATE`
+
+  - Na atualização, definir valor nulo
+
+- `CASCADE ON UPDATE`
+
+  - Na atualização, propagar
+
+Exemplo:
+
+``` sql
+CREATE TABLE EMPREGADO(
+      ...,
+      DNO INT NOT NULL DEFAULT 1,
+      CONSTRAINT EMP_PK PRIMARY KEY(CPF),
+      CONSTRAINT EMP_SUPER_CPF FORAING KEY(SUPERCPF),
+          REFERENCES EMPREGADO(CPF),
+          ON DELETE SET NULL ON UPDATE CASCADE,
+      CONSTRAINT EMP_DEPT_FK FORAING KEY(DNO),
+          REFERENCES DEPARTAMENTO (DNUMERO),
+          ON DELETE SET DEFAULT ON UPDATE CASCADE
+);
+```
+
+Esse processo é feito *após* o `CREATE TABLE` contendo as declarações de atributo, ou seja, após o `...`.
+
+No caso, estamos fazenddo os dois. Por exemplo, no caso do `EMP_DEPT_FK` estamos declarando que, em caso de exclusão, será aplicado o valor padrão `SET DEFAULT`, mas no caso de atualizar, será propagado pelo `CASCADE`.
+
+``` sql
+CREATE TABLE DEPARTAMENTO(
+      ...,
+      GER_CPF CHAR(9) NOT NULL DEFAULT '284677398',
+      ...
+      CONSTRAINT DEPT_PK PRIMARY KEY (DNUMERO),
+      CONSTRAINT DEPT_SK UNIQUE (NOME),
+      CONSTRAINT DEPT_GER_FK FORAING KEY (GER_CPF),
+          REFERENCES EMPREGADO(CPF),
+          ON DELETE SET DEFAULT ON UPDATE CASCADE
+);
+```
+
+Aqui temos um exemplo de declaração de valor padrão para o `GER_CPF`.
+
+Outro exemplo de `PRIMARY KEY` com dois campos:
+
+``` sql
+CREATE TABLE DEP_LOCALIZACOES(
+      DNUM INT NOT NULL,
+      DLOCALIZACAO VARCHAR(15) NOT NULL,
+      PRIMARY KEY (DNUM, DLOCALIZACAO),
+      FORAING KEY (DNUM),
+          REFERENCES DEPARTAMENTO(DNUM),
+          ON DELETE CASCADE ON UPDATE CASCADE
+);
+```
+
+Ou seja, não poderia colocar o `PRIMARY KEY` logo após a declaração de atributos.
+
+A palavra `CRONSTRAINT` nós temos que indicar o nome dessa restrição. Por isso, uma forma é usar o nome da tabale mais `FK` pois depois, se precisar eliminar algumas dessas restrições, podemos seguir esse nome.
+
+Podemos ainda fazer uma restrição em todas as tuplas de uma relação. Por exemplo ao criar uma condição para aceitar uma inserção:
+
+``` sql
+CHECK(DEP_DATA_CRIACAO < GERDATAINICIO)
+```
+
+Ou seja, quando for inserir uma tupla em `DEPARTAMENTO`, teremos que cuidar para que a data do início do gerente seja sempre maior que a data da criação do departamento.
+
+O comando `DROP` é o comando de exclusão. Só exclui objetos que foram nomeados: Esquemas, Tabelas, Domínios ou Restrições.
+
+Se uma Tabela não é mais nescessária, podemos excluir ela usando o `DROP TABLE`.
+
+``` sql
+DROP TABLE EMPREGADO CASCADE;
+```
+
+Neste caso, a tabela `DEPENDENTE` que está vinculada a ela também está vinculada, devido ao comando `CASCADE`.
+
+Agora se fizermos:
+
+``` sql
+DROP TABLE EMPREGADO RESTRICT;
+```
+
+Impedimos que tabelas vinculada a `EMPREGADO` sejam escluídas.
+
+Temos também o comando `ALTER` que permite:
+
+- Adicionar ou eliminar uma coluna de uma tabela;
+
+- Alterar o domínio de uma coluna;
+
+- Adicionar ou eliminar uma restição.
+
+``` sql
+ALTER TABLE EMPRESA.EMPREGADO
+    ADD FUNCAO VARCHAR(12);
+```
+
+Para adicionar um atributo em uma relação. Aqui, é um exemplo em que temos um esquema, e dessa forma, fazemos a alteração adicionando primeiro o esquema e depois a relação: `EMPRESA.EMPREGADO`.
+
+> A restrição `NOT NULL` não é permitida.
+
+Podemos também eliminar uma coluna:
+
+``` sql
+ALTER TABLE EMPRESA.EMPREGAADO
+      DROP ENDERECO CASCADE;
+```
+
+E garantimos que irá se propagar ao adicionar o `CASCADE`.
+
+E podemos alterar domínio também:
+
+``` sql
+ALTER TABLE EMPRESA.EMPREGADO
+    ALTER ENDERECO TYPE VARCHAR(100);
+```
+
+Assim, as infromações se mantém, mas elas serão de um novo tipo.
+
+Podemos também eliminar uma restrição:
+
+``` sql
+ALTER TABLE EMPRESA.EMPREGADO
+      ALTER GERCPF DROP DEFAULT;
+```
+
+Aqui, estamos eliminando incluir um valor *default* no atributo GERCPF quando tiver vazio.
+
+E podemos também incluir uma restrição:
+
+``` sql
+ALTER TABLE EMPRESA.EMPREGADO
+      ALTER GERCPF SET DEFAULT '372198372';
+```
+
+E apagamos a restrição usando `DROP CONSTRAINT`:
+
+``` sql
+ALTER TABLE EMPRESA.EMPREGADO
+      DROP CONSTRAINT EMP_SUPER_CPF CASCADE;
+```
+
+## Criando um Banco de Dados
+
+Dessa forma, vamos utilziar alguns comandos para construir um banco de dados relacionais semelhante ao que está no livro Sistema de Banco de Dados (Elmasri e Navathe, 2011) na página 48.
+
+Começamos por criar a tabela funcionários
+
+``` sql
+CREATE TABLE funcionario(
+pnome           varchar(30),
+minicial        varchar(30),
+unome           varchar(30),
+cpf             varchar(11),
+datanasc        date,
+endereco        varchar(100),
+sexo            char,
+salario         decimal(10,2),
+cpf_supervisor  varchar(11),
+dnr             integer,
+PRIMARY KEY(cpf)
+);
+```
+
+Agora a tabela departamento:
+
+``` sql
+CREATE TABLE departamento(
+dnome           varchar(30),
+dnumero         integer,
+cpf_gerente     varchar(11),
+data_inicio_gerente date,
+PRIMARY KEY(dnumero)
+);
+```
+
+E a tabela dependente:
+
+``` sql
+CREATE TABLE dependente(
+fcpf            varchar(11),
+nome_dependente varchar(50),
+sexo            char,
+datanasc        date,
+parentesco      varchar(50),
+PRIMARY KEY(fcpf, nome_dependente)
+);
+```
+
+Projeto;
+
+``` sql
+CREATE TABLE projeto(
+projnome        varchar(50),
+projnumero      integer,
+projlocal       varchar(50),
+dnum            integer,
+PRIMARY KEY(projnumero)
+);
+```
+
+Onde trabalha:
+
+``` sql
+-- trabalha_em
+CREATE TABLE trabalha_em(
+fcpf            varchar(11),
+pnr             integer,
+horas           decimal(5,1),
+PRIMARY KEY(fcpf, pnr)
+);
+```
+
+E departamento:
+
+``` sql
+CREATE TABLE localizacao_dep(
+dnumero     integer,
+dlocal          varchar(50),
+PRIMARY KEY(dnumero, dlocal)
+);
+```
+
+E depois, alteramos para incluir as chaves extrangeiras. A ideia é que, se tivessemos declarado durante a criação (ou seja, `CREATE TABLE`), precisariamos que a tabela da onde extraímos a chave estrageira já tivesse sido criada, mas ela também tem chave estrangeira. Portanto, criamos após o `CREATE TABLE`.
+
+``` sql
+ALTER TABLE funcionario ADD CONSTRAINT dep_func_fk FOREIGN KEY(dnr) REFERENCES departamento(dnumero);
+ALTER TABLE funcionario ADD CONSTRAINT superv_func_fk FOREIGN KEY(cpf_supervisor) REFERENCES funcionario(cpf);
+ALTER TABLE departamento ADD CONSTRAINT ger_dep_fk FOREIGN KEY(cpf_gerente) REFERENCES funcionario(cpf);
+ALTER TABLE dependente ADD CONSTRAINT func_depen_fk FOREIGN KEY(fcpf) REFERENCES funcionario(cpf);
+ALTER TABLE projeto ADD CONSTRAINT dep_proj_fk FOREIGN KEY(dnum) REFERENCES departamento(dnumero);
+ALTER TABLE localizacao_dep ADD CONSTRAINT dep_localizacao_fk FOREIGN KEY(dnumero) REFERENCES departamento(dnumero);
+ALTER TABLE trabalha_em ADD CONSTRAINT func_trabalha_em_fk FOREIGN KEY(fcpf) REFERENCES funcionario(cpf);
+ALTER TABLE trabalha_em ADD CONSTRAINT projeto_trabalha_em_fk FOREIGN KEY(pnr) REFERENCES projeto(projnumero);
+```
+
+## DML - Data Manipulation Language
+
+Vamos utilizar agora a DML para minupular os dados criado na seção anterior. Note que, antes de tudo, precisamos criar a estrutura da tabela, declarando os atributos, os domínios e a chave primária e estrangeira. Em seguida, podemos dar continuidade a manipulação de dados.
+
+Um dos principais comandos DML é o Inserir, que insere uma tupla na tabela, e precisa ser feito na mesma ordem dos atributos:
+
+``` sql
+INSERT INTO departamento
+VALUES('Pesquisa', 5, NULL, NULL)
+```
+
+Ou podemos inserir somente para alguns atributos, e nesse caso não precisa ser na ordem da tabela, apenas na ordem declarada. Exemplo:
+
+``` sql
+INSERT INTO departamento (dnumero, dnome)
+VALUES(1, 'Matriz')
+```
+
+Aqui, será utilizado a função `INSERT INTO` para adicionar os valores nas tabelas e o comando `UPDATE`.
+
+``` sql
+-- Departamento
+INSERT INTO departamento (dnome, dnumero)
+VALUES 
+('Pesquisa', 5),
+('Administração', 4),
+('Matriz', 1);
+```
+
+O primeiro que vamos adicionar é o *Departamento*. Nele, algumas informações dependem da tabela *Funcionário*, o que causa uma dependência circular, uma vez que *Funcionário* também depende de *Departamento*. Dessa forma, adicionamos valores para *Departamento* mas omitimos outros, e depois fazemos a atualização dessa tabela.
+
+Então seguimos com as inserções:
+
+Primeiro com *Funcionário:*
+
+``` sql
+-- Funcionario
+INSERT INTO funcionario
+VALUES
+('João', 'M', 'Silva', 12345678966, '1965-01-09', 'Rua das Flores, 751, São Paulo, SP', 'M', 30000, 33344555587,5),
+('Fernando', 'T', 'Wong', 33344555587, '1955-12-08', 'Rua da Lapa, 34, São Paulo, SP', 'M', 40000, 88866555576, 5),
+('Alice', 'J', 'Zelaya', 99988777767, '1968-01-19', 'Rua Souza Lima, 35, Curitiba, PR', 'F', 25000, 98765432168, 4),
+('Jennifer', 'S', 'Souza', 98765432168, '1941-06-20', 'Av. Arthur de Lima, 54, Santo André, SP', 'F', 43000, 88866555576, 4),
+('Ronaldo', 'K', 'Lima', 66688444476, '1962-09-15', 'Rua Rebouças, 65, Piracicaba, SP', 'M', 38000, 33344555587, 5),
+('Joice', 'A', 'Leite', 45345345376, '1972-07-31', 'Av. Lucas Obes, 74, São Paulo, SP', 'F', 25000, 33344555587, 5),
+('André', 'V', 'Pereira', 98798798733, '1969-03-29', 'Rua Timbira, 35, São Paulo, SP', 'M', 25000, 98765432168, 4),
+('Jorge', 'E', 'Brito', 88866555576, '1937-11-10', 'Rua do Horto, 35, São Paulo, SP', 'M', 55000, NULL, 1);
+```
+
+Depois com *Localização do Departamento:*
+
+``` sql
+-- Localizacao Departamento
+INSERT INTO localizacao_dep
+VALUES
+(1, 'São Paulo'),
+(4, 'Mauá'),
+(5, 'Santo André'),
+(5, 'Itu'),
+(5, 'São Paulo');
+```
+
+Depois com *Projeto:*
+
+``` sql
+-- Projeto
+INSERT INTO projeto
+VALUES
+('ProdutoX', 1, 'Santo André', 5),
+('ProdutoY', 2, 'Itu', 5),
+('ProdutoZ', 3, 'São Paulo', 5),
+('Informatização', 10, 'Mauá', 4),
+('Reorganização', 20, 'São Paulo', 1),
+('Novosbenefícios', 30, 'Mauá', 4);
+```
+
+Depois com *Depentende:*
+
+``` sql
+-- Dependente
+INSERT INTO dependente
+VALUES
+(33344555587, 'Alicia', 'F', '1986-04-05', 'Filha'),
+(33344555587, 'Tiago', 'M', '1983-10-25', 'Filho'),
+(33344555587, 'Janaína', 'F', '1958-05-03', 'Esposa'),
+(98765432168, 'Antonio', 'M', '1942-02-28', 'Marido'),
+(12345678966, 'Michael', 'M', '1988-01-04', 'Filho'),
+(12345678966, 'Alicia', 'F', '1988-12-30', 'Filha'),
+(12345678966, 'Elizabeth', 'F', '1967-05-05', 'Esposa');
+```
+
+*Trabalha em:*
+
+``` sql
+-- Trabalha em
+INSERT INTO trabalha_em
+VALUES
+(12345678966, 1, 32.5),
+(12345678966, 2, 7.5),
+(66688444476, 3, 40),
+(45345345376, 1, 20),
+(45345345376, 2, 20),
+(33344555587, 2, 10),
+(33344555587, 3, 10),
+(33344555587, 10, 10),
+(33344555587, 20, 10),
+(99988777767, 30, 30),
+(99988777767, 10, 10),
+(98798798733, 10, 35),
+(98798798733, 30, 5),
+(98765432168, 30, 20),
+(98765432168, 20, 15),
+(88866555576, 20, NULL);
+```
+
+E por último, atualizamos a tabela *Departamento* com as informações que ficaram ausentes.
+
+Para isso, usamos a seguinte estrutura:
+
+``` sql
+UPDATE <Relação>
+SET <Atualização>
+WHERE <Condição>
+```
+
+Note que em `UPDATE` indicamos a tabela, e em `SET` o que será adicionado, e em `WHERE` a condição, geralmente em relação a Chave Primária. Ou seja, vamos adicionar o CPF e Data para cada gerente a partir do seu número:
+
+``` sql
+-- Departamento Continuacao
+UPDATE departamento
+SET cpf_gerente = 33344555587,
+data_inicio_gerente = '1988-05-22'
+WHERE dnumero = 5;
+
+UPDATE departamento
+SET cpf_gerente = 98765432168,
+data_inicio_gerente = '1995-01-01'
+WHERE dnumero = 4;
+
+UPDATE departamento
+SET cpf_gerente = 88866555576,
+data_inicio_gerente = '1981-06-19'
+WHERE dnumero = 1;
+```
+
+Há também o comando para excluir algum registro. Neste caso também temos alguma condição para deletar. Neste caso a condição é mais essencial que no `UPDATE` uma vez que podemos apagar diversas tuplas que não queríamos apagar.
+
+``` sql
+DELETE FROM <relação>
+WHERE <alguma_coluna> = <algum_valor>
+```
+
+## DQL - Data Query Language
+
+### Consultas Básicas
+
+Esta é a sublinguagem para consultas. Esta é a parte que mais utilizamos, uma vez que é através dela que nós realizamos a maior parte da interação com o Banco de Dados, para acessar as informações presente neles.
+
+Aqui nós vamos continuar com o Banco de Dados *Empresa*. Porém, mesclando a linguagem R com SQL.
+
+```{r}
+#| echo: false
+library(DBI)
+library(RPostgres)
+library(usethis)
+
+readRenviron("~/.Renviron")
+
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname = "empresa",
+  host = Sys.getenv("DB_HOST"),
+  port = 5432,
+  user = Sys.getenv("DB_USER"),
+  password = Sys.getenv("DB_PASSWORD")
+)
+```
+
+A forma mais básica de se fazer uma consuta é através do `SELECT`, com a seguinte estrutura:
+
+``` sql
+SELECT <lista de atributos>
+FROM <lista de tabelas>
+WHERE <condição>
+```
+
+Aqui, após o `SELECT` temos a lista de atributos, ou seja, todas as tabelas que queremos que esse comando nos devolva. O `FROM` é a lista de tabelas. Pode ser um ou mais, e é onde esses atributos tem que existir. E o `WHERE` é a condição, ou seja, quais registros vamos trazer.
+
+Os operadores mais comuns são: =, \<, \> \<=, \>=, e \<\>.
+
+Por exemplo, se eu gostaria de saber o nome dos funcionários masculinos:
+
+```{r}
+dbGetQuery(con, 
+          "SELECT pnome, sexo 
+           FROM funcionario 
+           WHERE sexo = 'M';")
+```
+
+Ou se por exemplo, eu queria saber o endereço e a data de nascimento do empregado João:
+
+```{r}
+dbGetQuery(con,
+          "SELECT pnome, datanasc, endereco
+           FROM funcionario
+           WHERE pnome = 'João' AND unome = 'Silva';")
+```
+
+Podemos querer também os endereços de todos os funcionários:
+
+```{r}
+dbGetQuery(con,
+          "SELECT pnome, endereco
+           FROM funcionario;")
+```
+
+Ou então podemos selecionar todas as tuplas de todos os funcionários. neste caso, adicionamos o \*
+
+```{r}
+dbGetQuery(con, 
+          "SELECT * 
+           FROM funcionario;")
+```
+
+Outra consulta poderia ser a recuperação do endereço dos funcionários que trabalham no departamento de pesquisa.
+
+```{r}
+dbGetQuery(con,
+           "SELECT pnome, unome, endereco, dnome
+           FROM funcionario, departamento
+           WHERE dnome = 'Pesquisa' AND
+           dnumero = DNR;")
+```
+
+Veja que podemos selecionar atributos tanto da tabela `funcionario` quanto da tabela `departamento`. Nossa consulta gerou resultados de Nome, Sobrenome, Endereço e o Nome do Departamento.
+
+Outra coisa importante é que, quando temos duas tabelas e temos que vincular uma com a outra, a Chave Estrangeira (no caso a `DNR`) de uma tabela tem que apontar para a Chave Primária (no caso `dnumero`) da outra.
+
+Um terceiro exemplo que tem o mesmo conceito é o exemplo abaixo. Aqui, a ideia é filtrar informações de projetos que estão localizados em São Paulo, e selecionar as informações do Número do Projeto, Número do departamento, Sobrenome do Gerente, Endereço, e Data de Aniversário
+
+```{r}
+dbGetQuery(con,
+           "SELECT projnumero, dnum, unome, endereco, datanasc
+           FROM funcionario, departamento, projeto
+           WHERE dnum = dnumero AND cpf_gerente = cpf AND projlocal = 'São Paulo'")
+```
+
+Veja que a Chave Extrangeira `dnum` da tabela `projeto` é a Chave Primária `dnumero` da tabela `departamento`, e a Chave Extrangeiro `cpf_gerente` é a Chave Primária `cpf` da tabela `funcionario`.
+
+Podemos usar "Apelidos" usando o `AS`, as chamadas Alias:
+
+```{r}
+dbGetQuery(con,
+           "SELECT f.pnome, f.unome, s.pnome, s.unome
+           FROM funcionario AS f, funcionario AS s
+           WHERE f.cpf_supervisor = s.cpf")
+```
+
+Aqui selecionamos os nomes de funcionarios e os supervisores, embora sejam da mesma tabela.
+
+O mesmo pode ser feito sem o `AS`
+
+```{r}
+dbGetQuery(con,
+           "SELECT f.pnome, f.unome, s.pnome, s.unome
+           FROM funcionario f, funcionario s
+           WHERE f.cpf_supervisor = s.cpf")
+```
+
+Temos o mesmo resultado.
+
+Isso pode resultar em uma melhor compreensão da consulta. Por exemplo:
+
+```{r}
+dbGetQuery(con,
+           "SELECT pnome, unome, endereco
+           FROM funcionario f, departamento d
+           WHERE d.dnome = 'Pesquisa' AND d.dnumero = f.DNR")
+```
+
+A ausência de `WHERE` indica que não há condições para a seleção de tuplas. Ou seja, todas as tuplas das relações especificadas no `FROM` irão aparecer na relação resultante.
+
+Por exemplo:
+
+```{r}
+dbGetQuery(con,
+           "SELECT cpf FROM funcionario;")
+```
+
+Ou
+
+```{r}
+dbGetQuery(con,
+          "SELECT cpf, dnome
+          FROM funcionario, departamento;")
+```
+
+Ou seja, não imponho nenhuma condição à consulta.
+
+Para selecionar todos os atributos, uso o \*
+
+```{r}
+dbGetQuery(con,
+           "SELECT *
+           FROM funcionario
+           WHERE dnr = 5")
+```
+
+Ou então:
+
+```{r}
+dbGetQuery(con,
+           "SELECT *
+           FROM funcionario, departamento
+           WHERE dnome = 'Pesquisa' AND dnr = dnumero;")
+```
+
+Podemos também pedir para que o resultado da consulta seja ordenada. Para isso, usamos o comando `ORDER BY`. Isso possibilita organizar pela data, por ordem alfabética, e selecionar a partir de qual atributo irá ocorrer essa ordenação. Um exemplo:
+
+```{r}
+dbGetQuery(con,
+           "SELECT dnome AS dep_nome, unome, pnome, projnome
+           FROM departamento, funcionario, trabalha_em, projeto
+           WHERE dnumero = dnr AND cpf = fcpf AND pnr = projnumero
+           ORDER BY dnome, unome, pnome")
+```
+
+O que fizemos aqui é basicamente, apelidamos o dep_nome como dnome, e selecionamos os atributos dnome, unome, pnome, projnome, que esão nas tabelas departamento, funcionario, trabalha_em e projeto, e sekecionamos os que possuem o numero de departemento igual, cpf igual e o número do projeto igual as chaves que estão conectados. E então ordenamos pelo nome do departamento, sobrenome e nome.
+
+Veja que na ordenação de atributos não é possível utilizar o Aliases. Uma alternativa também seria o uso de números:
+
+```{r}
+dbGetQuery(con,
+           "SELECT dnome AS dep_nome, unome, pnome, projnome
+           FROM departamento, funcionario, trabalha_em, projeto
+           WHERE dnumero = dnr AND cpf = fcpf AND pnr = projnumero
+           ORDER BY 1, 2, 3")
+```
+
+Por padrão, a ordem é ascendente. Ou seja, se for numérico é do menor para o maior. Se for varchar, será por ordem alfabética, se for data, da mais antiga para a mais recente.
+
+Mas podemos explicitar isso usando o `ASC` e o `DESC`:
+
+```{r}
+dbGetQuery(con,
+           "SELECT dnome AS dep_nome, unome, pnome, projnome
+           FROM departamento, funcionario, trabalha_em, projeto
+           WHERE dnumero = dnr AND cpf = fcpf AND pnr = projnumero
+           ORDER BY dnome DESC, unome ASC, pnome ASC;")
+```
+
+### Consultas Avançadas
+
+Aqui, há a incrementação de novos operadores, novas cláusulas que permite consultas mais sofisticadas.
+
+#### ***Joins***
+
+É geralmente utilizado nos comandos de consultas (i.e. `SELECT`). E permite selecionar dados que estão armazenados nas nossas tabelas de modo que eles sejam reestruturados e gerem novas tabelas temporárias mostrando o que foi solicitado.
+
+Uma vez que estamos em banco de dados relacionais, nossas consultas permite agregar diferentes tabelas. Aqui, a chave estrangeira é a responsável por fazer a interligação entre tabelas e permite fazer a agregação.
+
+Os joins são praticamente a alma, e portanto precisam ser bem intendidos.
+
+Vamos praticar no banco de dados chamado *Locadora*
+
+```{r}
+#| echo: false
+library(DBI)
+library(RPostgres)
+library(usethis)
+
+readRenviron("~/.Renviron")
+
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname = "locadora",
+  host = Sys.getenv("DB_HOST"),
+  port = 5432,
+  user = Sys.getenv("DB_USER"),
+  password = Sys.getenv("DB_PASSWORD")
+)
+```
+
+Como faríamos para consultar todas as unidades da frota dos automóveis?
+
+```{r}
+dbGetQuery(con,
+           "SELECT * FROM AUTOMOVEL
+           JOIN UNIDADE ON COD_AUTO = CODAUTO;")
+```
+
+Vemos que precisamos colocar que a Chave Primária de `AUTOMOVEL` é = à Chave Estrangeira de `UNIDADE`.
+
+E consultar o Nome, Cor e Modelo das Unidades de Golf?
+
+``` sql
+SELECT NOME, COR, MODELO
+FROM AUTOMOVEL
+JOIN UNIDADE 
+    ON COD_AUTO = CODAU
+WHERE COD_AUTO = '18'
+```
+
+Podemos observar que, para selecionar o Automovel Golf, usamos o códifo dele `18`.
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT NOME, COR, MODELO
+           FROM AUTOMOVEL
+           JOIN UNIDADE 
+              ON COD_AUTO = CODAUTO
+           WHERE COD_AUTO = '18';")
+```
+
+Os `JOINS` são estruturados da seguinte maneira: o `FROM` vem da tabela que possui as chaves primárias, e os `JOIN` vem das tabelas que possui as chaves estrangeiras. Nós podemos fazer `JOIN` com várias tabelas, desde que elas possuem as chaves estrangeiras. E o `ON` faz justamente esse apontamento: da chave primária para a chave estrangeira, e por isso possui o sinal de igualdade.
+
+É importante destacar que o mesmo poderia ser feito com o seguinte comando:
+
+``` sql
+SELECT NOME, COR, MODELO
+FROM AUTOMOVEL, UNIDADE
+WHERE COD_AUTO = CODAUTO AND COD_AUTO = '18';
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT NOME, COR, MODELO
+           FROM AUTOMOVEL, UNIDADE
+           WHERE COD_AUTO = CODAUTO AND COD_AUTO = '18';")
+```
+
+Porém, essa é uma sintaxe antiga. Utilizar o `JOIN` juntamente com o `WHERE` deixa a escrita mais organizada, uma vez que o `ON` deixa claro como as tabelas se relacionam, e `WHERE` deixa claro a condição.
+
+Para deixar a sintaxe ainda mais legível, poderíamos usar as aliases. Dessa forma, deixamos claro de quais tabelas estamos retirando os atributos.
+
+``` sql
+SELECT a.NOME, a.COR, a.MODELO
+FROM AUTOMOVEL AS a
+JOIN UNIDADE AS u
+    ON a.COD_AUTO = u.CODAUTO
+WHERE a.COD_AUTO = '18';
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT a.NOME, u.COR, u.MODELO
+            FROM AUTOMOVEL AS a
+            JOIN UNIDADE AS u
+                ON a.COD_AUTO = u.CODAUTO
+            WHERE a.COD_AUTO = '18';")
+```
+
+#### ***Tipos de Joins***
+
+Há, porém, alguns tipos de `JOINS`.
+
+##### Inner Join
+
+O primeiro é o `INNER JOIN`. A ideia é que ele retorna o que é comum nas duas tabelas. A figura abaixo demonstra isso, a intercsão das duas tabelas:
+
+![](images/clipboard-1416496716.png){fig-align="center"}
+
+No nosso exemplo do banco de dados automóveis, ele ficaria da seguinte maneira:
+
+``` sql
+SELECT * 
+FROM AUTOMOVEL AS A
+INNER JOIN UNIDADE AS U 
+    ON A.COD_AUTO = U.CODAUTO
+```
+
+```{r}
+dbGetQuery(con,
+           "SELECT * 
+            FROM AUTOMOVEL AS A
+            INNER JOIN UNIDADE AS U ON
+            A.COD_AUTO = U.CODAUTO")
+```
+
+##### Left Join
+
+A ideia do `LEFT JOIN` é que seja selecionado todos os registros de uma tabela, e os registros dessa tabela que também estão presentes em outra tabela.
+
+Como na figura abaixo podemos ver uma representação. O `LEFT JOIN` vai retornar os registros da Tabela A mesmo se eles não estão na Tabela B, mas também os que estão em ambas as Tabelas.
+
+![](images/clipboard-1127997385.png){fig-align="center"}
+
+No nosso exemplo do Banco de Dados Locadora, podemos fazer o seguinte:
+
+``` sql
+SELECT *
+FROM AUTOMOVEL AS A
+LEFT JOIN UNIDADE AS U 
+    ON A.COD_AUTO = U.CODAUTO
+```
+
+```{r}
+dbGetQuery(con,
+           "SELECT *
+            FROM AUTOMOVEL AS A
+            LEFT JOIN UNIDADE AS U 
+            ON A.COD_AUTO = U.CODAUTO")
+```
+
+Se pensarmos na ideia de duas tabelas: `AUTOMOVEL` e `UNIDADE`, podemos pensar que a Tabela A da figura, ou seja, a `LEFT` é a Tabela `AUTOMOVEL`. A ideia é algo como: `AUTOMOVEL` `JOIN` `UNIDADE`, sendo respectivamente Tabela A e Tabela B. Dessa forma, a Tabela que viria os registros mesmo que esses registros não estejam na outra é a Tabela `AUTOMOVEL`.
+
+Como podemos ver, há o cinco automóveis. Embora a tabela `UNIDADE` não tenha o `COD_AUTO` 19, ela está presente na Tabela `AUTOMOVEL`, e por isso foi favorecida.
+
+##### Right Join
+
+Aqui a ideia é a oposta do `LEFT JOIN`. Entra tudo que está na Tabela vinda do `LEFT JOIN` e da que vem do `FROM` só o que está no intersecto.
+
+![](images/clipboard-4056351510.png){fig-align="center"}
+
+Vamos testar usando exatamente o mesmo comando, apenas substituindo o `LEFT` pelo `RIGHT`:
+
+``` sql
+SELECT *
+FROM AUTOMOVEL AS A
+RIGHT JOIN UNIDADE AS U 
+    ON A.COD_AUTO = U.CODAUTO
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT *
+            FROM AUTOMOVEL AS A
+            RIGHT JOIN UNIDADE AS U 
+            ON A.COD_AUTO = U.CODAUTO")
+```
+
+Podemos ver que o veícuclo 19 não aparece mais, por não estar na Tabela `UNIDADE`.
+
+##### Outer Join/ Full Join/ Full Outer Join
+
+Por fim, temos o `OUTER JOIN` que retorna todos os registros da Tabela A, todos da tabela B e todos que estão no intersecto:
+
+![](images/clipboard-2367347918.png){fig-align="center"}
+
+Usando a mesma base de código:
+
+``` sql
+SELECT *
+FROM AUTOMOVEL AS A
+FULL OUTER JOIN UNIDADE AS U 
+    ON A.COD_AUTO = U.CODAUTO
+```
+
+```{r}
+dbGetQuery(con,
+           "SELECT *
+            FROM AUTOMOVEL AS A
+            FULL OUTER JOIN UNIDADE AS U 
+            ON A.COD_AUTO = U.CODAUTO")
+```
+
+Temos todos os registros.
+
+### Operadores
+
+Nesta sessão, vamos trabalhar com alguns operadores para consultas em SQL.
+
+#### Distinct
+
+A cláusula `DISTINCT` tem como função remover tuplas repitidas do conjunto de resultados da consulta, após o `SELECT`.
+
+É aplicado para um atributo, para verificar se, dentro deste atributos, há valores de tuplas que se repetem. Porém, pode ser aplicada em mais tabelas. Dessa forma, ela apresenta apenas uma tupla de cada grupo de tuplas repetidas.
+
+Voltando com o Banco de Dados *Empresa*, vamos aplicar alguns exemplos.
+
+```{r}
+#| echo: false
+library(DBI)
+library(RPostgres)
+library(usethis)
+
+readRenviron("~/.Renviron")
+
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname = "empresa",
+  host = Sys.getenv("DB_HOST"),
+  port = 5432,
+  user = Sys.getenv("DB_USER"),
+  password = Sys.getenv("DB_PASSWORD")
+)
+```
+
+Vamos demonstrar, solitando o salário, para mostrar os valores de salários mas sem reptir os valores.
+
+Primeiro, vamos fazer a chamada sem o `DISTINCT` e então, fazemos a chamada com para comparar:
+
+``` sql
+SELECT salario
+           FROM funcionario
+```
+
+```{r}
+dbGetQuery(con,
+           "SELECT salario
+           FROM funcionario;")
+```
+
+Agora vamos usar o distinct:
+
+``` sql
+SELECT DISTINCT salario
+           FROM  funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT DISTINCT salario
+           FROM  funcionario;")
+```
+
+Podemos ver que os três salários no valor de R\$ 25000.00 não se repete nesta consulta utilizando o operador `DISTINCT`, vemos que aparece apenas um desses salários, uma vez que são repitidos são retirados.
+
+#### Operadores Lógicos
+
+Há também os operadores lógicos: `AND`, `OR` e `NOT`, que, basicamente, retorna `TRUE`, `FALSE` ou `NULL`, para a consulta.
+
+Exemplo:
+
+``` sql
+SELECT *
+FROM funcionario
+WHERE salario = 25000 AND sexo = 'F';
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT *
+            FROM funcionario
+            WHERE salario = 25000 AND sexo = 'F';")
+```
+
+#### Operadores de Comparação
+
+Há também os operradores de comparação: \>, \<, \<=, \>=, =, \<\> (ou !=)
+
+Podemos utilizar uma combinação desses operadores conforme as informações que precisamos.
+
+Exemplo:
+
+``` sql
+SELECT *
+FROM funcionario
+WHERE salario <= 35000
+AND datanasc > '1970-01-01'
+```
+
+```{r}
+dbGetQuery(con,
+           "SELECT *
+            FROM funcionario
+            WHERE salario <= 35000
+            AND datanasc > '1970-01-01'")
+```
+
+> O campo data é curioso pois, embora seja inserido como string, é possível utilizar operadores matemáticos para as consultas
+
+#### Operador Between
+
+É um operador especial, que basicamente significa *Entre*. É equivalente a usar os operadores de comparação \<= e \>= ao mesmo tempo. Basta utilizar o operador `BETWEEN`.
+
+Um exemplo seria buscar funcionarios que ganham entre 25 e 45 mil no departamento 5:
+
+``` sql
+SELECT * 
+FROM funcionario
+WHERE (salario >= 25000 AND salario <= 40000)
+    AND dnr = 5;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM funcionario
+            WHERE (salario >= 25000 AND salario <= 40000)
+                AND dnr = 5;")
+```
+
+Poderia ser feito assim:
+
+``` sql
+SELECT * 
+FROM funcionario
+WHERE (salario BETWEEN 20000 AND 45000)
+    AND dnr = 5;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM funcionario
+            WHERE (salario BETWEEN 25000 AND 45000)
+                  AND dnr = 5;")
+
+```
+
+Essa sintaxe é muito mais legível, e não precisa repetir `salario`.
+
+#### Comparações e Funções com NULL
+
+O `NULL` pode ter alguns significados em Banco de dados. Ele pode significar:
+
+- Valor desconhecido: ou seja, esse valor existe mas não conhecemos. Um exemplo seria a data de nascimento de um funcionário.
+
+- Valor indisponível: uma informação que existe mas está, proporcionalmente omitida. Exemplo: endereço de email de um funcionário
+
+- Valor não aplicável: indefinido para determinada tupla. Um exemplo poderia ser uma segunda graduação.
+
+Dessa forma, um `NULL` sempre será diferente de outro `NULL`, são considerados valores diferentesentre si: `NULL != NULL`.
+
+Dessa forma, para saber se algo é `NULL`, não devemos perguntar se algo é `NULL` usando o símbulo de igualdade (=). Devemos usar as seguintes expressões:
+
+- `IS NULL` -\> equivalente a =
+
+- `IS NOT NULL` -\> equivalente a \<\>
+
+Por exemplo, se queremos saber se há algum funcionário não tem a data de nascimento preenchida, devemos fazer assim:
+
+``` sql
+SELECT *
+FROM funcionario
+WHERE datanasc IS NULL
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+           FROM funcionario
+           WHERE datanasc IS NULL;")
+
+```
+
+Há outra função chamada `COALESCE` que verifica os valores da expressão e retorna o primeiro valor não nulo:
+
+``` sql
+SELECT COALESCE(fone_1, fone_2, fone_3) FROM aluno
+```
+
+Neste exemplo, queremos o telefone do aluno. Mas há três campos que este telefone pode estar, no `fone_1`, `fone_2` e `fone_3`. Porém, em um caso onde o aluno possui apenas um número, e não sabemos em qual campo ele foi inserido, podemos usar a função `COALESCE` que, dentro dos três campos, vai retornar o primeiro que não tem valor `NULL`.
+
+#### Operadores Matemáticos
+
+Temos também os operadores matemáticos: +, -, \* e / para as operações básicas, mas também temos:
+
+- \% para módulo
+
+- \^ exponenciação
+
+- \|/ raiz quadrada
+
+- \|\|/ raiz cúbica
+
+- ! fatorial
+
+- !! fatorial
+
+- \@ valor absoluto
+
+Um exmplo seria calcular o novo salário após o acrescimno de 10% para todos os funcionários:
+
+``` sql
+SELECT pnome, unome, 1.1*salario AS nv_salario
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT pnome, unome, 1.1*salario AS nv_salario
+           FROM funcionario;")
+```
+
+E assim temos a atualização dos salários.
+
+### Consultas - Funções e Funções de correspondência
+
+Nesta seção, vamos aprender a como trabalhar com funções matemáticas e funções de correspondência de texto (i.e. *strings*), importante quando temos que fazer comparações de texto. Diversas funções matemáticas podem ser encontradas na [documentação](https://www.postgresql.org/docs/current/functions-math.html) do PostgreSQL, assim como de outros SGBDs também.
+
+#### Função Road
+
+Tem como objetivo arredondar os números segundo uma quantidade de casas decimais determinadas:
+
+``` sql
+SELECT produto, ROUND(valor_litro, 2)
+FROM combustivel;
+```
+
+Aqui o valor do litros será arredondado para duas casas decimais.
+
+#### Função Trunc
+
+Tem como objetivo efetuar o truncamento (i.e. o corte) de números para a quantidade de casas decimais determinada na função.
+
+``` sql
+SELECT produto, TRUNC(valor_litro, 2)
+FROM combustível;
+```
+
+Ele se difere do `ROUND` pelo fato de não fazer o arredondamento para mais ou para menos, apenas realiza o corte.
+
+#### Função MOD
+
+Tem como objetivo exibir o resto da divisão de um valor pelo outro
+
+``` sql
+SELECT MOD(valor, 2)
+FROM tabela:
+```
+
+#### Funções e operações para *String*
+
+Há muitos operadores e funções para manipulação e examinação de *cadeias de caracteres*. Cadeias de caracteres inclui todos os valores de *character, character varying* e *text*.
+
+#### Função Lower
+
+Converte as letras da cadeia de caracteres em minúsculas:
+
+``` sql
+SELECT LOWER(nome_usuario)
+FROM cadastro;
+```
+
+#### Função Upper
+
+A função `UPPER` é o oposto: torna as letras da cadeia de caracteres em maiúsculas:
+
+``` sql
+SELECT UPPER(sigla_estado)
+FROM cadastro;
+```
+
+Por exemplo quando queremos os dados das Unidades de Federações, que geralmente se encontram em siglas, então podemos usar a função `UPPER`.
+
+#### Função Initcap
+
+Converte a primeira letra de cada palavra em maíuscula, e as demais em minúscula:
+
+``` sql
+SELECT INITCAP(cidade)
+FROM cadastro;
+```
+
+#### Função SUBSTR
+
+Ela tem como objetivo extrair parte da cadeia de caracteres correspondente a quantidade de caracteres especificada nos parâmetros da função:
+
+- 2º parâmetro da função: origem (posição do caractere inicial)
+
+- 3º parâmetro da função: comprimento da *substring*
+
+``` sql
+SELECT SUBSTR(nome, 2, 4)
+FROM professor;
+```
+
+Neste caso, vai selecionar 4 caracteres mas irá começar a contar a partir do segundo.
+
+#### Função Length
+
+Tem como objetivo exibir o número de caracteres presentes na *string:*
+
+``` sql
+SELECT matricula, LENGTH(nome)
+FROM aluno;
+```
+
+#### Função Replace
+
+A `REPLACE` é uma função muito utilizada, e tem como objetivo substituir todas as ocorrências na string em questão, da cadeia de caracteres de origem (2º parâmetro da função) pela cadeia de caracteres do destino (3º parâmetro da função).
+
+``` sql
+SELECT REPLACE(nome, 'R', 'K')
+FROM professor;
+```
+
+Pode ser utilizada para realizar correções, ou atualizações. Neste caso, todas as *strings* que iniciam com R serão substituídas pelo K.
+
+Há mais funções na [documentação](https://www.postgresql.org/docs/current/functions-string.html).
+
+### Funções de Correspondência
+
+Nas funções de correspondência temos a função `LIKE` e `ILIKE`. Elas verificam se determinada *string* está contida no conjunto de strings representado por determinado padrão. que será especificado.
+
+`LIKE` é *case sensitive*, ou seja, ele faz distinção entre maíscula e minúscula.
+
+`ILIKE` não é *case sensitive*, ou seja, não faz distinção entre maíscula e minúscula.
+
+Nós podemos definir "coringas" para definir o padrão a ser comparado:
+
+`%` significa qualquer quantidade de caracteres
+
+`_` significa apenas um caractere
+
+Por exemplo:
+
+Utilizando a base de dados *locadora*, podemos verificar o nome de carros que começam com a letra R:
+
+```{r}
+#| echo: false
+library(DBI)
+library(RPostgres)
+library(usethis)
+
+readRenviron("~/.Renviron")
+
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname = "locadora",
+  host = Sys.getenv("DB_HOST"),
+  port = 5432,
+  user = Sys.getenv("DB_USER"),
+  password = Sys.getenv("DB_PASSWORD")
+)
+```
+
+``` sql
+SELECT * 
+FROM automovel
+WHERE nome LIKE 'R%'
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM automovel
+            WHERE nome LIKE 'R%'")
+```
+
+Ou podemos verificar carros que terminam com a letra f:
+
+``` sql
+SELECT * 
+FROM automovel
+WHERE nome LIKE '%f'
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM automovel
+            WHERE nome LIKE '%f'")
+```
+
+Ou pro exemplo, buscar nomes de carros que tenham a combinação ya:
+
+``` sql
+SELECT * 
+FROM automovel
+WHERE nome LIKE '%ya%';
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM automovel
+            WHERE nome LIKE '%ya%';")
+```
+
+Usando o coringa `_` a busca é referente a apenas um caracter:
+
+``` sql
+SELECT * 
+FROM automovel
+WHERE nome LIKE '_olf';
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM automovel
+            WHERE nome LIKE '_olf';")
+```
+
+Nós podemos combinar a busca com os dois:
+
+``` sql
+SELECT * 
+FROM automovel
+WHERE nome LIKE '_ene%';
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT * 
+            FROM automovel
+            WHERE nome LIKE '_ene%';")
+```
+
+O fato de não usarmos o singal de `=` com *string* é que pode haver uma grande variação de digitação, e portanto, essas funções entram como alternativas.
+
+Vemos, porém, que usando o `LIKE` a busca fica *case-sensitive*. Mas podemos tentar usar o `ILIKE` para não ser tão rigoroso.
+
+### Operações sobre Conjuntos
+
+Essas operações visam apresentar como devemos realizar consultas para tratar os resultados como conjuntos de elementos.
+
+É similar a ideia de "somar" ou "subtrair" registros de duas ou mais consultas:
+
+Um ponto importante é que as consultas precisam ter o mesmo número de colunas para cada tabela. Elas precisam também serem equivalentes, ou seja, os dados precisam ser do mesmo tipo também (i.e. varchar com varchar, integer com integer).
+
+Para isso, temos algumas operações:
+
+`UNION` que faz a união entre conjuntos;
+
+`INTERSECT` que faz a interseção entre conjuntos; e
+
+`EXCEPT` que faz a diferença de uma consulta.
+
+O `UNION` faz a união entre os resultados de dois `SELECT`. Essa união é feito pelas linhas, ou seja, uma linha abaixo da outra, como se estivesse empilhando os resultados das duas consultas. Linhas repetidas são ignoradas.
+
+> Sendo assim, as colunas precisam, além de serem equivalentes, terem os mesmos nomes, certo?
+
+O Comando `UNION ALL` as linhas reptidas são exibidas.
+
+#### Não confundir `UNION` con `JOIN`
+
+Enquanto o `JOIN` é a junção entre colunas de tabelas diferentes seguindo uma condição, o `UNION` é a união das tuplas de duas tabelas.
+
+O `INTERSECT` realiza as interseção o resultado de dois `SELECT`, e a interseção é também feita entre linhas de ambos os resutlados. Aqui também as linhas repetidas serão ignoradas. Porém, com o comando `INTERSECT ALL` as linhas repetidas serão exibidas.
+
+O `EXCEPT` realiza as diferenças entre os resultados do `SELECT`. As diferenças é entre as linhas, ou seja, as linhas que estão em um resultado que não estão em outro resultado. As linhas repetidas são ignoradas, mas com `EXCEPT ALL`, as linhas repetidas serão exibidas.
+
+### Funções de Agregação e Agrupamento
+
+#### Funções de Agregação
+
+Tem como objetivo, obter informações sobre o conjunto de linhas especificadas na cláusula `WHERE` ou sobre grupos de linhas (`GROUP BY`).
+
+- `COUNT`
+
+- `MAX`
+
+- `MIN`
+
+- `SUM`
+
+- `AVG`
+
+Quando aplicamos uma função de agregação, o resultado é apenas apenas uma tupla em que as informações estão armazenadas conforme o seu objetivo.
+
+Se utilizamos a palavra `DISTINCT` dentro do parêntese de uma função de agregação, executa a função ignorando as repetições.
+
+Os valores `NULL` são ignorados pelas funções de agregação.
+
+A função `COUNT` vai devolver o número de linhas que resultam de um `SELECT`. Ela pode ser feita de algumas maneiras:
+
+- `COUNT (*)` - devolve o nº de linhas que resulta de um `SELECT`
+
+- `COUNT (coluna)` - devolve o nº de ocorrências na coluna diferentes de `NULL`
+
+- `COUNT (DISTINCT coluna)` - devolve o nº de ocorrências (sem repetição) na coluna
+
+Vamos considerar o banco de dados *empresa*.
+
+```{r}
+#| echo: false
+library(DBI)
+library(RPostgres)
+library(usethis)
+
+readRenviron("~/.Renviron")
+
+con <- DBI::dbConnect(
+  RPostgres::Postgres(),
+  dbname = "empresa",
+  host = Sys.getenv("DB_HOST"),
+  port = 5432,
+  user = Sys.getenv("DB_USER"),
+  password = Sys.getenv("DB_PASSWORD")
+)
+```
+
+Se queremos saber a quantidade de funcionários na empresa, podemos rodar o seguinte comando (lembrando que `AS` é o "apelido" que quermos mostrar nos resultados):
+
+``` sql
+SELECT COUNT(*) AS total
+FROM funcionario
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT COUNT(*) AS total
+           FROM funcionario;")
+```
+
+O resultado será, obviamente, o número de tuplas.
+
+Mas podemos também verificar funcionarios que recebem um salário maior que R\$5.000,00:
+
+``` sql
+SELECT COUNT(*) AS maiores
+FROM funcionario
+WHERE salario > 5000;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT COUNT(*) AS maiores
+           FROM funcionario
+           WHERE salario > 5000;")
+```
+
+Se quisermos saber quantos supervisor temos na empresa:
+
+``` sql
+SELECT COUNT(DISTINCT cpf_supervisor) AS sup
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT COUNT(DISTINCT cpf_supervisor) AS sup
+           FROM funcionario;")
+```
+
+Uma pessoa pode supervisionar mais de um funcionário, dessa forma, usamos `DISTINCT` para retirar os CPFs repitidos.
+
+#### Função Min e Max
+
+Permitem selecionar o menor e o maior valor que está armazenado em um determinado atributo.
+
+Essas funções podem ser aplicadas a atributos que não contenham valores numéricos. Uma vez que o SQL permite trabalhar de uma maneira "matemática" os dados, podemos utilizar essas funções para ordenar por órdem alfabética, ou cronológica.
+
+Por exemplo, se queremos saber a menor hora trabalhada na empresa
+
+``` sql
+SELECT MIN(horas) AS min_horas
+FROM trabalha_em
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT MIN(horas) AS min_horas
+           FROM trabalha_em;")
+```
+
+Ou se queremos saber quem é mais velhor:
+
+``` sql
+SELECT MIN(datanasc) AS mais_velho
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT MIN(datanasc) AS mais_velho
+           FROM funcionario;")
+```
+
+É interessante na função de agregação utilizar um "apelido" que mostre a aplicabilidade da consulta, ou seja, para quê estamos fazendo.
+
+Alguns exemplos com a função `MAX`:
+
+Para saber o maior salário:
+
+``` sql
+SELECT MAX(salario) AS maior_salario
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT MAX(salario) AS maior_salario
+           FROM funcionario;")
+```
+
+Ou para consultar a data em que a ultima pessoa assumiu como gerente:
+
+``` sql
+SELECT MAX(data_inicio_gerente) AS ultimo
+FROM departamento;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT MAX(data_inicio_gerente) AS ultimo
+           FROM departamento;")
+```
+
+#### Função Sum
+
+Devolve a soma dos valores de uma determinada coluna. Só pode ser aplicado a campos numéricos.
+
+Se quiser saber o total da folha de pagamento:
+
+``` sql
+SELECT SUM(salario) AS total_folha
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT SUM(salario) AS total_folha
+           FROM funcionario;")
+```
+
+E se eu quiser calcular um aumento de 10% para todos aqueles funcionários que ganham menos que R\$ 30.000,00?
+
+``` sql
+SELECT SUM(salario*1.1) AS nova_folha
+FROM funcionario
+WHERE salario < 2000
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT SUM(salario*1.1) AS nova_folha
+           FROM funcionario
+           WHERE salario < 30000;")
+```
+
+#### Função AVG
+
+Entrega a média de valores de determinado atributo. Também só pode eser aplicado a campo numérico.
+
+Por exemplo:
+
+Qual a média de horas que os funcionários estão vinculado ao projeto?
+
+``` sql
+SELECT AVG(horas) AS media_horas
+FROM trabalha_em;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT AVG(horas) AS media_horas
+           FROM trabalha_em;")
+```
+
+Ou se quiser saber a média de salário:
+
+``` sql
+SELECT AVG(salario) AS media_salario
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT AVG(salario) AS media_salario
+           FROM funcionario;")
+```
+
+### Função de Agrupamentos
+
+Para aumentar o potencial de consulta, há as funções de agrupamentos. Geralmente, as funções de agrupamentos são aplicadas em informações de forma agrupada, não como um todo. Ou seja, geralmente não será aplicado para todas as tuplas, pois o objetivo é agrupar.
+
+Possibilita aplicar a funções de agregação a grupos menores de informações.
+
+Para isso, temos duas funções:
+
+- `GROUP BY`; e
+
+- `HAVING`
+
+Com essas funções a estrutura do `SELECT` precisa ficar nescessáriamente da seguinte maneira, se não, não irá funcionar:
+
+``` sql
+SELECT <campos>
+FROM <tabela>
+WHERE <condição>
+GROUP BY <agrupamentos>
+HAVING <condição aos grupos>
+ORDER BY <se quiser ordenar>
+```
+
+#### Gourp by
+
+A cláusula `GROUP BY` possibilita agrupar as informações ao utilizar funções de agregação. Ou seja, ela dividi o resultado de uma função de agregação em agrupamentos. Como resultado, teremos um valor de função de agregação para cada grupo.
+
+Todas as colunas selecionadas precisam estar presentes no `GROUP BY`.
+
+Por exemplo:
+
+Se queremos fazer uma contagem de funcionario (ou seja, um CPF - é importante usar a chave primária para fazer essa operação), e essa contagem é por departamento. Para isso, vamos fazer:
+
+``` sql
+SELECT dnr, COUNT(cpf) AS num_func
+FROM funcionario
+GROUP BY dnr
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT dnr, COUNT(cpf) AS num_func
+           FROM funcionario
+           GROUP BY dnr")
+```
+
+Se eu quiser saber quanto cada funcionario dedica para cada projeto podemos fazer:
+
+``` sql
+SELECT pnr, SUM(horas) AS num_horas
+FROM trabalha_em
+GROUP BY pnr
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT pnr, SUM(horas) AS num_horas
+            FROM trabalha_em
+            GROUP BY pnr")
+```
+
+Podemos tentar também uma consulta para saber quantos dependente cada funcionário possui:
+
+``` sql
+SELECT cpf, pnome || unome, COUNT(*)
+FROM DEPENDENTE
+JOIN funcionario ON (cpf == fcpf)
+GROUP BY cpf, pnome, unome;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT cpf, pnome || unome, COUNT(*)
+            FROM dependente
+            JOIN funcionario ON (cpf = fcpf)
+            GROUP BY cpf, pnome, unome;")
+```
+
+Dessa forma sabemos quantos dependentes cada funcionário possui.
+
+Todos os gruos presentes no `SELECT` que não estão na função de agregação, obrigatoriamente precisam estar no `GROUP BY`.
+
+#### Having
+
+A cláusula `HAVING` efetua restrições ao nível dos grupos que estão sendo processados. Ele atua sobre o resultados dos grupos.
+
+Exemplo:
+
+Se queremos saber quantos CPFs existem por departamento, podemos fazer:
+
+``` sql
+SELECT dnr, COUNT(cpf) AS num_func
+FROM funcionario
+GROUP BY dnr
+HAVING COUNT(cpf) > 10
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT dnr, COUNT(cpf) AS num_func
+            FROM funcionario
+            GROUP BY dnr
+            HAVING COUNT(cpf) < 10;")
+```
+
+Mas vejamos que só queremos departamento em que a contagem é menor que 10. Muito importante ter em mente que a restrição é para o grupo que acaba de ser formado com o `GROUP BY`.
+
+Novamente:
+
+Quando utilizar:
+
+- `WHERE` - quando se pretende restringir os registros (as tuplas) a ser considerados na seleção.
+
+- `HAVING` - quando se pretende restringir a partir dos grupos que foram formados.
+
+Não se pode usar funções de agregação na cláusula `WHERE`.
+
+Em resumo:
+
+- A cláusula `WHERE` só pode ser aplicada a registros individuais;
+
+- A cláusula `HAVING` só pode ser aplicada a função de grupo.
+
+Por exemplo:
+
+Se queremos saber quantos dependentes de funcionarios nascido a partir de 1950 que possuem mais de 2 dependentes, aplicamos:
+
+``` sql
+SELECT cpf, pnome || unome, COUNT(*)
+FROM dependente
+JOIN funcionario ON (cpf = fcpf)
+WHERE datanasc < '1969-01-01'
+GROUP BY cpf, pnome, unome
+HAVING COUNT(*) > 2
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT cpf, pnome || unome, COUNT(*)
+            FROM dependente AS d
+            JOIN funcionario AS f ON (f.cpf = d.fcpf)
+            WHERE d.datanasc > '1950-01-01'
+            GROUP BY cpf, pnome, unome
+            HAVING COUNT(*) > 2")
+```
+
+É sempre bom, nestes casos, usar `aliases`. Neste exemplo acima, `datnasc` esta presente nas duas tabelas. Usando `aliases` facilita determinar exatamente de qual tabela estamos usando o atributo.
+
+E o que acontece quando os dados agrupados de uma coluna que dentre eles existe o valor `NULL`?
+
+Em um `SELECT` com cláusula `GROUP BY`, se existirem `NULL` na coluna de agrupamento, estes também são agrupados.
+
+#### Ordenação
+
+Quanto a ordenação de grupos, segue-se as mesmas regras:
+
+Pode–se fazer ordenação por:
+
+- Coluna
+
+- Por expressões ou funções de agregação
+
+### Subconsultas - Subquery
+
+São mais uma ferramenta para construir consultas mais complexas e atender nossas nescessidades na hora de obter dados dos SGBDs.
+
+O comando `SELECT` retorna o resultado em forma de tabela temporária. São atribuídos nomes as tabelas desta consulta. Nós podemos incorporar esses resultados em outro comando `SELECT` e é desta forma que geramos uma subconsulta. Ou seja, Um `SELECT` dentro de outro `SELECT`.
+
+Dessa forma, o Query é estruturado da seguinte maneira:
+
+``` sql
+SELECT <campo>
+FROM <tabela>
+WHERE <condição> =
+      (
+      SELECT <campo>, <funcao>
+      FROM <tabela>
+      )
+```
+
+Um comando `SELECT` pode ser alocado:
+
+- Dentro de um outro `SELECT`, nas cláusulas `WHERE`, `HAVING`, `SELECT` e `FROM`;
+
+- Dentro de umaa outra subconsulta nas mesmas cláusulas do intem anterior;
+
+- Nos comandos `INSERT`, `UPDATE` e `DELETE`;
+
+- Na definição de `VIEW`
+
+Mas na prática, comos implementamos estas subconsulta?
+
+Se temos um problema: Qual é o nome do funcionário com o menor salário na empresa?
+
+A solução passa por duas etapas:
+
+1.  Qual é o valor do menor salário?
+2.  Qual é o nome do funcionário que recebe este salário?
+
+Vamos seguir passo a passo:
+
+Etapa 1:
+
+``` sql
+SELECT MIN(salario) AS menor_salario
+FROM funcionario;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT MIN(salario) AS menor_salario
+           FROM funcionario;")
+```
+
+Etapa 2:
+
+``` sql
+SELECT nome, unome, salario
+FROM funcionario
+WHERE salario = 25000;
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT pnome, unome, salario
+           FROM funcionario
+           WHERE salario = 25000;")
+```
+
+Temos então os funcionários com os menores salários.
+
+Mas podemos fazer de uma forma que fique estruturado em apenas uma consulta, sem precisar primeiro descobrir qual o menor salário, para então descobrir o nome.
+
+Para isso, precisamos transpor a consulta sobre o menor salário na consulta sobre o nome do funcionário:
+
+``` sql
+SELECT pnome, unome, salario
+FROM funcionario
+WHERE salario = 
+          (
+          SELECT MIN(salario)
+          FROM funcionario
+          );
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT pnome, unome, salario
+            FROM funcionario
+            WHERE salario = 
+                  (
+                  SELECT MIN(salario)
+                  FROM funcionario
+                   );")
+```
+
+#### Subconsulta correlacionada
+
+É a subconsulta que, para seu funcionamento, depende de consultas mais externa. O `SELECT` interno (da subconsulta) tem que considerar um conjunto específico de registros que está sendo analisado individualmente pelo `SELECT` externo. A ligação entre os dois `SELECT` é feita pelo `WHERE`.
+
+Por exemplo:
+
+Se queremos saber o nome dos vendedores cujo salário é menor do que 15 vezes a soma de suas próprias comissões:
+
+``` sql
+SELECT nome, salario
+FROM vendedor v
+WHERE salario < (
+        SELECT SUM(valor)
+        FROM comissao c
+        WHERE v.id = c.id * 15
+)
+```
+
+Podemos ver que a ligação está justamente no `id`, que representa a chave primária e permite identificar o vendedor.
+
+#### Subconsulta não-correlacionada
+
+Mas há também a subconstula não-correlacionada, quando a consulta não depende de valores da consulta extra:
+
+``` sql
+SELECT pnome, salario
+FROM funcionario
+WHERE salario = (
+      SELECT MAX(salario)
+      from funcionario
+);
+```
+
+```{r}
+#| echo: false
+dbGetQuery(con,
+           "SELECT pnome, salario
+            FROM funcionario
+            WHERE salario = (
+                   SELECT MAX(salario)
+                   from funcionario
+            );")
+```
+
+Ou seja, a consulta não depende de valores sobre a cosulta externa.
+
+Em resumo:
+
+| Funcionamento | Consultas não-correlacionadas | Consultas correlacionadas |
+|----|----|----|
+| Sentido da execução | Da interna para a externa | Da externa para a interna |
+| Dependência da consulta interna | Não depende da consulta externa | Depende da consulta externa |
+| Execução da consulta interna | Uma única vez | Tantas vezes quanto forem executadas pela consulta externa |
+
+#### Operadores IN
+
+Os operadores `IN` permite verificar se um valor existe dentro de uma coluna ou conjunto de valores dentro de um parêntese. Se temos quatro possíveis valores, podemos saber se um determinado valor está dentro desses quatro valores.
+
+Nas subconsultas, podemos verificar se o valor está no resultado de uma subconsulta, retornando `TRUE` ou `FALSE`.
+
+Por exemplo, se queremos saber quais clientes cadastrados residem em Veranópolis:
+
+``` sql
+SELECT nome, cep
+FROM cliente
+WHERE cep IN (
+      SELECT cep
+      FROM endereco
+      WHERE cidade = 'Veranópolis'
+);
+```
+
+Há também o `NOT IN` que é a ideia inversa:
+
+``` sql
+SELECT nome, telefone
+FROM cliente
+WHERE id_cliente NOT IN (
+    SELECT id_cliente
+    FROM compra
+);
+```
+
+#### Operador Exists
+
+Este operador verifica se a execução da subconsulta gerou ou não alguma linha de resultado, retornando `TRUE` ou `FALSE`. A estrutura é a seguinte:
+
+``` sql
+SELECT <campos>
+FROM <tabela>
+WHERE  [NOT] EXISTS (<subsonculta>)
+```
+
+O operador nunca é precedido por qualquer coluna ou expressão. Como devolve apenas `TRUE` ou `FALSE`, as subconsultas associadas são geralmente do tipo `SELECT * FROM`.
+
+Por exemplo, se queremos o nome dos vendedores que tem comissões a receber:
+
+``` sql
+SELECT nome
+FROM funcionario f
+WHERE EXISTS (
+    SELECT * FROM comissao c
+    WHERE f.id = c.id
+)
+```
+
+#### Operador ALL e ANY
+
+Operadores que podem ser adicionados a comparações que utilizem os operadores relacionais =, \<, \>, \<=, \>=, \<\>
+
+Permitem realizar comparações com o seguinte formato:
+
+```         
+<expressao> operador ALL (subconsulta)
+```
+
+```         
+<expressao> operador ANY (subconsulta)
+```
+
+##### Operador `ALL`
+
+O resultado é verdadeiro se, **para cada um dos valores resutlantes da subconsulta**, a expressão devolver o valor lógico verdadeiro.
+
+``` sql
+SELECT nome, datanasc
+FROM cliente
+WHERE cep <> ALL (
+      SELECT cep FROM endereco
+      WHERE cidade = 'Veranópolis'
+);
+```
+
+Esta consulta seleciona clientes que **não** residem em Veranópolis.
+
+##### Operador `ANY`
+
+O resultado é verdadeiro se, **para qualquer dos valores resultantes da subconsulta**, a expressão retnorna o valor lógico verdadeiro.
+
+``` sql
+SELECT nome, datanasc
+FROM cliente
+WHERE cep = ANY (
+      SELECT cep FROM endereco
+      WHERE cidade <> 'Veranópolis'
+)
+```
+
+Uma dica é que quando a subconsulta depende de valores externos (subconsultas não correlacionada), nós devemos execultar primeiro a subconsulta para verificar se corresponde ao que queremos e depois construímos a consulta toda.
