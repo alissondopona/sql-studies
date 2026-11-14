@@ -2378,7 +2378,7 @@ Ou seja, a consulta não depende de valores sobre a cosulta externa.
 Em resumo:
 
 | Funcionamento | Consultas não-correlacionadas | Consultas correlacionadas |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | Sentido da execução | Da interna para a externa | Da externa para a interna |
 | Dependência da consulta interna | Não depende da consulta externa | Depende da consulta externa |
 | Execução da consulta interna | Uma única vez | Tantas vezes quanto forem executadas pela consulta externa |
