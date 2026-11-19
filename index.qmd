@@ -1,6 +1,6 @@
 ---
 title: "SQL Studies"
-subtitle: "Notas, exemplos e exercícios"
+subtitle: "Notas de estudo do curso de Administrador de Banco de Dados do Instituto Federal do Rio Grande do Sul"
 author: "Alisson Dopona"
 format:
   html:
@@ -221,7 +221,7 @@ REVOKE ALL PRIVILEGES ON DEPARTAMENTO FROM
   POSTGRES;
 ```
 
-## Instalando o PostgreSQL
+## Instalando o PostgreSQL em distribuições baseadas no Debian
 
 Para instalar o postgresql no Ubuntu, o primeiro passo é rodar o seguinte comando:
 
@@ -293,11 +293,15 @@ Assim, nós configuramos o usuário postgres, e então, vamos fazer com que o Po
 
 Na página inicial aparece: `Add new Server`. Clicamos nele. Irá abrir uma janela em que, na aba `General`, iremos fazer a nomeação da conexão com qualquer nome. Na aba `Connection` colocamos como Host name/adress: localhost. Mantemos o nome do banco de dados e do usuário (geralmente ambos como `postgres`. A senha é a que acabamos de configurar. Clicamos em save e pronto, está configurado.
 
-## Rodando o PostgreSQL no R
+## Integrando PostgreSQL com R
 
-Para rodar o PostgreSQL no R, precisamos instalar os pacotes `RPostgre` e `DBI`. Como já tenho, precisamos apenas carregar. O pacote DBI precisa ser carregado primeiro.
+Para rodar o PostgreSQL no R, precisamos instalar e carregar os pacotes `RPostgre` e `DBI`. O pacote DBI precisa ser carregado primeiro.
 
 ``` r
+install.packages("DBI")
+install.packages("RPostgres")
+install.packages("usethis")
+
 library(DBI)
 library(RPostgres)
 library(usethis)
