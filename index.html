@@ -101,11 +101,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#vdl-view-data-language" id="toc-vdl-view-data-language" class="nav-link" data-scroll-target="#vdl-view-data-language">VDL: View Data Language</a></li>
   <li><a href="#dcl-data-control-language" id="toc-dcl-data-control-language" class="nav-link" data-scroll-target="#dcl-data-control-language">DCL: Data Control Language</a></li>
   </ul></li>
-  <li><a href="#instalando-o-postgresql" id="toc-instalando-o-postgresql" class="nav-link" data-scroll-target="#instalando-o-postgresql">Instalando o PostgreSQL</a>
+  <li><a href="#instalando-o-postgresql-em-distribuições-baseadas-no-debian" id="toc-instalando-o-postgresql-em-distribuições-baseadas-no-debian" class="nav-link" data-scroll-target="#instalando-o-postgresql-em-distribuições-baseadas-no-debian">Instalando o PostgreSQL em distribuições baseadas no Debian</a>
   <ul>
   <li><a href="#configurar-o-postgreadmin" id="toc-configurar-o-postgreadmin" class="nav-link" data-scroll-target="#configurar-o-postgreadmin">Configurar o PostgreAdmin</a></li>
   </ul></li>
-  <li><a href="#rodando-o-postgresql-no-r" id="toc-rodando-o-postgresql-no-r" class="nav-link" data-scroll-target="#rodando-o-postgresql-no-r">Rodando o PostgreSQL no R</a></li>
+  <li><a href="#integrando-postgresql-com-r" id="toc-integrando-postgresql-com-r" class="nav-link" data-scroll-target="#integrando-postgresql-com-r">Integrando PostgreSQL com R</a></li>
   <li><a href="#ddl-create" id="toc-ddl-create" class="nav-link" data-scroll-target="#ddl-create">DDL Create</a>
   <ul>
   <li><a href="#tipos-de-dados-de-atributos" id="toc-tipos-de-dados-de-atributos" class="nav-link" data-scroll-target="#tipos-de-dados-de-atributos">Tipos de dados de atributos</a></li>
@@ -191,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">SQL Studies</h1>
-<p class="subtitle lead">Notas, exemplos e exercícios</p>
+<p class="subtitle lead">Notas de estudo do curso de Administrador de Banco de Dados do Instituto Federal do Rio Grande do Sul</p>
 </div>
 
 
@@ -362,8 +362,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  POSTGRES;</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
-<section id="instalando-o-postgresql" class="level2">
-<h2 class="anchored" data-anchor-id="instalando-o-postgresql">Instalando o PostgreSQL</h2>
+<section id="instalando-o-postgresql-em-distribuições-baseadas-no-debian" class="level2">
+<h2 class="anchored" data-anchor-id="instalando-o-postgresql-em-distribuições-baseadas-no-debian">Instalando o PostgreSQL em distribuições baseadas no Debian</h2>
 <p>Para instalar o postgresql no Ubuntu, o primeiro passo é rodar o seguinte comando:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install postgresql postgresql-contrib</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Em seguida, iniciamos o banco de dados:</p>
@@ -395,12 +395,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Na página inicial aparece: <code>Add new Server</code>. Clicamos nele. Irá abrir uma janela em que, na aba <code>General</code>, iremos fazer a nomeação da conexão com qualquer nome. Na aba <code>Connection</code> colocamos como Host name/adress: localhost. Mantemos o nome do banco de dados e do usuário (geralmente ambos como <code>postgres</code>. A senha é a que acabamos de configurar. Clicamos em save e pronto, está configurado.</p>
 </section>
 </section>
-<section id="rodando-o-postgresql-no-r" class="level2">
-<h2 class="anchored" data-anchor-id="rodando-o-postgresql-no-r">Rodando o PostgreSQL no R</h2>
-<p>Para rodar o PostgreSQL no R, precisamos instalar os pacotes <code>RPostgre</code> e <code>DBI</code>. Como já tenho, precisamos apenas carregar. O pacote DBI precisa ser carregado primeiro.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RPostgres)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(usethis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="integrando-postgresql-com-r" class="level2">
+<h2 class="anchored" data-anchor-id="integrando-postgresql-com-r">Integrando PostgreSQL com R</h2>
+<p>Para rodar o PostgreSQL no R, precisamos instalar e carregar os pacotes <code>RPostgre</code> e <code>DBI</code>. O pacote DBI precisa ser carregado primeiro.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"DBI"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"RPostgres"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"usethis"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DBI)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RPostgres)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(usethis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Em seguida, precisamos carregar as variáveis manualmente:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">readRenviron</span>(<span class="st">"~/.Renviron"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Em seguida, precisamos fazer a conexão com o R. A senha precisa estar no <code>Renviron</code> para então adicionarmos aqui.</p>
